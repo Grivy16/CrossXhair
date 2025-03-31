@@ -2,8 +2,8 @@
 - ### [Introduction](#introducing-simple-crosshair)
 - ### [Key Features](#-key-features)
 - ### [Why Choose](#-why-choose-simple-crosshair)
+- ### [Download](#download)
 
-https://github.com/Grivy16/Simple-Crosshair/releases
 # Introducing Simple Crosshair
 
 Simple Crosshair is a virtual aiming manager developed by Grivy16, designed to provide an optimal and personalized gaming experience. Whether for gaming or other applications, this tool offers comfort and precision.
