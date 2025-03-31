@@ -28,7 +28,5 @@ With its intuitive interface and advanced customization options, Simple Crosshai
 
 Try Simple Crosshair now and elevate your gaming experience!
 
-PS : Do not start whith the chek box in the installer close the installer after the install then open the app whit start menu or other
-
 ##  Download
 Download the lasted release here https://github.com/Grivy16/Simple-Crosshair/releases
