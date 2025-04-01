@@ -1,3 +1,7 @@
+## Language
+- #### 🟦⬜🟥 FR-fr : https://git  hub.com/Grivy16/CrossXhair/blob/main/Language/FR-fr.md
+- #### ⬛⬛⬛ EN-en : https://github.com/Grivy16/CrossXhair/blob/main/README.md
+
 # Résumé  
 - ### [Introduction](#introduction-de-crossxhair)  
 - ### [Caractéristiques principales](#-caractéristiques-principales)  
