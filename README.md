@@ -6,7 +6,7 @@
 - ### [Introduction](#introducing-crossxhair)
 - ### [Key Features](#-key-features)
 - ### [Why Choose](#-why-choose-crossxhair)
-- ### [Download](#download)
+- ### [Download](#download-1)
 
 # Introducing CrossXhair
 
