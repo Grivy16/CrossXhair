@@ -1,12 +1,12 @@
 ## Language
-- #### 🟦⬜🟥 FR-fr : https://git  hub.com/Grivy16/CrossXhair/blob/main/Language/FR-fr.md
+- #### 🟦⬜🟥 FR-fr : https://github.com/Grivy16/CrossXhair/blob/main/Language/FR-fr.md
 - #### ⬛⬛⬛ EN-en : https://github.com/Grivy16/CrossXhair/blob/main/README.md
 
 # Résumé  
-- ### [Introduction](#introduction-de-crossxhair)  
+- ### [Introduction](#-introduction-de-crossxhair)  
 - ### [Caractéristiques principales](#-caractéristiques-principales)  
-- ### [Pourquoi choisir CrossXhair](#-pourquoi-choisir-crossxhair)  
-- ### [Téléchargement](#téléchargement)  
+- ### [Pourquoi choisir CrossXhair](#-pourquoi-choisir-crossxhair-)  
+- ### [Téléchargement](#-téléchargement)  
 
 # 🎯 Introduction de CrossXhair  
 
@@ -33,4 +33,4 @@ Avec son interface intuitive et ses options de personnalisation avancées, **Cro
 Essayez **CrossXhair** dès maintenant et améliorez votre expérience de jeu !  
 
 ## 📥 Téléchargement  
-Téléchargez la dernière version ici : [CrossXhair Releases](https://github.com/Grivy16/CrossXhair/releases)
+### Téléchargez la dernière version ici : [CrossXhair Releases](https://github.com/Grivy16/CrossXhair/releases)
