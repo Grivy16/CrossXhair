@@ -33,4 +33,4 @@ With its intuitive interface and advanced customization options, CrossXhair adap
 Try CrossXhair now and elevate your gaming experience!
 
 ##  Download
-Download the lasted release here https://github.com/Grivy16/CrossXhair/releases
+### Download the lasted release here https://github.com/Grivy16/CrossXhair/releases
