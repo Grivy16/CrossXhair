@@ -27,7 +27,7 @@ class TransparentApp(QWidget):
         try :
             self.update_image(self.shared_data.Chemin_image)  # Mise à jour initiale de l'image
         except Exception as e :
-            with open(".AppData/log.txt", 'a') as fichier:
+            with open(".AppData/CrossXhairLog.log", 'a') as fichier:
                 now = datetime.now()
                 formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
                 fichier.write(f"\n[{formatted_time}]:{e} | Image not found it deplace or deleted")

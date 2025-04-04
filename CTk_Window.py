@@ -7,6 +7,8 @@ from tkinter import filedialog, messagebox
 from datetime import datetime
 import subprocess
 from pathlib import Path
+import winshell
+import json
 
 class Setting(ctk.CTk):
     def __init__(self, shared_data):
@@ -66,8 +68,11 @@ class Setting(ctk.CTk):
         self.Other_frame_widget()
 
     def change_image(self, img_path):
-        with open(".AppData/Data.txt", 'w') as fichier:
-            fichier.write(img_path)
+        with open(".AppData/Data.json", 'r', encoding="utf-8") as fichier:
+            data = json.load(fichier)
+        data["Info"]["Crosshair"] = img_path
+        with open(".AppData/Data.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
 
             # Créer un CTkImage au lieu de passer le chemin
         try :
@@ -77,7 +82,7 @@ class Setting(ctk.CTk):
                 size=(150, 150)
             )
         except Exception as e :
-            with open(".AppData/log.txt", 'a') as fichier:
+            with open(".AppData/CrossXhairLog.log", 'a') as fichier:
                 now = datetime.now()
                 formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
                 fichier.write(f"\n[{formatted_time}]:{e} | Image not found it deplace or deleted")
@@ -150,8 +155,26 @@ class Setting(ctk.CTk):
             title="Sélectionner un fichier",
             filetypes=[("Fichiers exexutable", "*.exe")]
         )
-        with open(".AppData/files.txt", "a", encoding="utf-8") as fichier:
-            fichier.write(f"{self.chemin_files}\n")
+
+        with open(".AppData/Data.json", 'r', encoding="utf-8") as fichier:
+            data = json.load(fichier)
+
+        # Vérifier si la clé "File" existe déjà, sinon l'initialiser comme un dictionnaire vide
+        if "File" not in data:
+            data["File"] = {}
+
+        # Trouver la prochaine clé disponible
+        next_index = len(data["File"])
+
+        # Ajouter la nouvelle entrée sans effacer les anciennes
+        data["File"][str(next_index)] = self.chemin_files
+
+        # Sauvegarder les modifications dans Data.json
+        with open(".AppData/Data.json", "w", encoding="utf-8") as fichier:
+            json.dump(data, fichier, indent=4, ensure_ascii=False)
+
+
+
 
         for widget in self.appcatalogue_frame.winfo_children():
             widget.destroy()
@@ -170,13 +193,23 @@ class Setting(ctk.CTk):
         self.shared_data.visibility_changed.emit(state)  # Émet le signal
     def delete_file_function(self, path):
         self.path = path
-        with open(".AppData/files.txt", 'r') as fichier:
-            contenu = fichier.read()
+        with open(".AppData/Data.json", 'r', encoding="utf-8") as fichier:
+            data = json.load(fichier)
 
-        contenu_modifié = contenu.replace(path + "\n", "").replace(path, "")
+        # Supprimer l'élément correspondant à self.path
+        for key, value in list(data["File"].items()):  # Utiliser list() pour éviter les problèmes lors de la modification du dict
+            if value == self.path:
+                del data["File"][key]  # Supprimer l'élément correspondant
+                break
 
-        with open(".AppData/files.txt", 'w') as fichier:
-            fichier.write(contenu_modifié)
+        # Réindexer les éléments dans "File"
+        data["File"] = {str(index): value for index, value in enumerate(data["File"].values())}
+
+        # Sauvegarder les modifications dans Data.json
+        with open(".AppData/Data.json", "w", encoding="utf-8") as fichier:
+            json.dump(data, fichier, indent=4, ensure_ascii=False)
+
+
 
         # Effacer tous les widgets du frame avant de le reconstruire
         for widget in self.appcatalogue_frame.winfo_children():
@@ -185,8 +218,9 @@ class Setting(ctk.CTk):
         # Reconstruire le frame
         self.appcatalogue_frame_widget()
     def appcatalogue_frame_widget(self):
-        with open(".AppData/files.txt", 'r') as fichier:
-            lignes = fichier.read().splitlines()
+        with open(".AppData/Data.json", "r", encoding="utf-8") as fichier:
+            data = json.load(fichier)
+        lignes = list(data["File"].values())
         self.a=0
         for ligne in lignes :
             if ligne :
@@ -246,7 +280,7 @@ class Setting(ctk.CTk):
                 size=(150, 150)
             )
         except Exception as e :
-            with open(".AppData/log.txt", 'a') as fichier:
+            with open(".AppData/CrossXhairLog.log", 'a') as fichier:
                 now = datetime.now()
                 formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
                 fichier.write(f"\n[{formatted_time}]:{e} | Image not found it deplace or deleted")
@@ -348,7 +382,7 @@ class Setting(ctk.CTk):
 
     def apply_image(self):
         # Appliquer le nouveau chemin d'image
-        with open(".AppData/Data.txt", 'r') as fichier:
-            self.chemin_fichier = fichier.read()
-        self.shared_data.set_image(self.chemin_fichier)
+        with open(".AppData/Data.json", "r", encoding="utf-8") as f:
+            self.datafiles = json.load(f)
+        self.shared_data.set_image(self.datafiles["Info"]["Crosshair"])
 
