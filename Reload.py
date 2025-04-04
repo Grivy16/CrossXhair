@@ -1,2 +1,5 @@
 import subprocess
-subprocess.Popen("Main.exe")
+
+def Run() :
+    subprocess.Popen("Main.exe")
+

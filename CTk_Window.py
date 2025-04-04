@@ -9,6 +9,10 @@ import subprocess
 from pathlib import Path
 import winshell
 import json
+import Reload
+import psutil
+import win32gui
+import win32process
 
 class Setting(ctk.CTk):
     def __init__(self, shared_data):
@@ -114,7 +118,17 @@ class Setting(ctk.CTk):
                                            fg_color="gray",
                                            hover_color="#404040",
                                            command=lambda : os.startfile(Path.cwd()))
-        self.openfiles_btn.grid(row=1, column=0, pady=(5,10), padx=10, columnspan=2)
+        self.openfiles_btn.grid(row=1, column=0, pady=(5,5), padx=10, columnspan=2)
+        self.openlog_btn = ctk.CTkButton(self.Other_frame, text="Open CrossXhairLog.log", width=380, corner_radius=20, font=("Calibri", 18, "bold"),
+                                         fg_color="gray",
+                                         hover_color="#404040",
+                                         command=lambda : os.startfile(".AppData\\CrossXhairLog.log"))
+        self.openlog_btn.grid(row=2, column=0, pady=(5,5), padx=10, columnspan=2)
+        self.RELOAD_btn = ctk.CTkButton(self.Other_frame, text="Reaload app", width=380, corner_radius=20, font=("Calibri", 18, "bold"),
+                                        fg_color="gray",
+                                        hover_color="#404040",
+                                        command=lambda : Reload.Run())
+        self.RELOAD_btn.grid(row=3, column=0, pady=(5,10), padx=10, columnspan=2)
     def Start_switch_event(self):
         state = self.Start_switch_var.get()
         if state =="off":
@@ -151,36 +165,86 @@ class Setting(ctk.CTk):
         except Exception as e:
             messagebox.showerror("Error",f"🚫 Error deleting shortcut: {e}")
     def addfilewisget(self):
-        self.chemin_files = filedialog.askopenfilename(
-            title="Sélectionner un fichier",
-            filetypes=[("Fichiers exexutable", "*.exe")]
-        )
+        def addappinfile(path):
+            with open(".AppData/Data.json", 'r', encoding="utf-8") as fichier:
+                data = json.load(fichier)
 
-        with open(".AppData/Data.json", 'r', encoding="utf-8") as fichier:
-            data = json.load(fichier)
+            # Vérifier si la clé "File" existe déjà, sinon l'initialiser comme un dictionnaire vide
+            if "File" not in data:
+                data["File"] = {}
 
-        # Vérifier si la clé "File" existe déjà, sinon l'initialiser comme un dictionnaire vide
-        if "File" not in data:
-            data["File"] = {}
+            # Trouver la prochaine clé disponible
+            next_index = len(data["File"])
 
-        # Trouver la prochaine clé disponible
-        next_index = len(data["File"])
+            # Ajouter la nouvelle entrée sans effacer les anciennes
+            data["File"][str(next_index)] = path
 
-        # Ajouter la nouvelle entrée sans effacer les anciennes
-        data["File"][str(next_index)] = self.chemin_files
+            # Sauvegarder les modifications dans Data.json
+            with open(".AppData/Data.json", "w", encoding="utf-8") as fichier:
+                json.dump(data, fichier, indent=4, ensure_ascii=False)
+            for widget in self.appcatalogue_frame.winfo_children():
+                widget.destroy()
+            self.appcatalogue_frame_widget()
+            self.AddAppWindows.destroy()
+        def add_btnpcapp():
+            def get_open_windows(hwnd, windows):
+                # Vérifier si la fenêtre est visible
+                if win32gui.IsWindowVisible(hwnd):
+                    window_title = win32gui.GetWindowText(hwnd)
+                    if window_title != '':
+                        # Récupérer le PID du processus associé à la fenêtre
+                        _, pid = win32process.GetWindowThreadProcessId(hwnd)
+                        process = psutil.Process(pid)
+                        executable_path = process.exe()  # Chemin de l'exécutable du processus
 
-        # Sauvegarder les modifications dans Data.json
-        with open(".AppData/Data.json", "w", encoding="utf-8") as fichier:
-            json.dump(data, fichier, indent=4, ensure_ascii=False)
+                        # Extraire seulement le nom de l'exécutable (sans chemin)
+                        executable_name = executable_path.split("\\")[-1]  # Prendre la dernière partie du chemin
 
+                        # Ajouter le nom de l'exécutable et le chemin à la liste
+                        windows.append((executable_name, executable_path))
 
+            # Liste pour stocker les noms des exécutables et leurs chemins
+            fenetres_avec_exe = []
 
+            # Récupérer toutes les fenêtres ouvertes
+            win32gui.EnumWindows(get_open_windows, fenetres_avec_exe)
 
-        for widget in self.appcatalogue_frame.winfo_children():
-            widget.destroy()
+            # Supprimer les doublons dans la liste en utilisant un ensemble, puis revenir à une liste
+            fenetres_avec_exe = list(set(fenetres_avec_exe))
+            self.a = 0
+            for exe, path in fenetres_avec_exe:
+                self.file_button = ctk.CTkButton(
+                    self.framepcapp,
+                    textvariable=path,
+                    text=exe,
+                    width=350,
+                    corner_radius=20,
+                    height=10,
+                    font=("Calibri", 18, "bold"),
+                    fg_color="transparent",
+                    hover_color="#404040",
+                    command=lambda p=path : addappinfile(p)
+                ).grid(row=self.a, column=0, padx=0, pady=5)
+                self.a += 1
 
-        # Reconstruire le frame
-        self.appcatalogue_frame_widget()
+        self.AddAppWindows = ctk.CTkToplevel(self)
+        self.AddAppWindows.title("CrossXhair AddApp")
+        self.AddAppWindows.iconbitmap('.AppData\\logo.ico')
+        self.AddAppWindows.attributes("-topmost", True)
+
+        self.TitreLabelAddApp = ctk.CTkLabel(self.AddAppWindows, text="Opened Appcation", fg_color="transparent", font=("Calibri", 18, "bold"))
+        self.TitreLabelAddApp.grid(row=0, column=0, padx=10, pady=(10,5))
+
+        self.framepcapp = ctk.CTkScrollableFrame(self.AddAppWindows, width=380, height=200, corner_radius=20)
+        self.framepcapp.grid(row=1, column=0, padx=10, pady=(5,5))
+        threading.Thread(target=add_btnpcapp).start()
+
+        self.addapp_button = ctk.CTkButton(self.AddAppWindows, text="Add App with file", width=380, corner_radius=20, font=("Calibri", 18, "bold"),
+                                           fg_color="#d37000",
+                                           hover_color="#8c5600",
+                                           command=lambda : addappinfile(filedialog.askopenfilename(title="Select a file un fichier",filetypes=[("Fichiers exexutable", "*.exe")]))
+                                           )
+        self.addapp_button.grid(row=2, column=0, padx=10, pady=(5,10))
 
     def addApp_frame_widget(self):
         self.addapp_button = ctk.CTkButton(self.addApp_frame, text="Add Application", width=380, corner_radius=20, font=("Calibri", 18, "bold"),
@@ -234,7 +298,7 @@ class Setting(ctk.CTk):
                     fg_color="transparent",
                     hover_color="#404040",
                     command=lambda path=ligne:threading.Thread(target=subprocess.run([path]).start())
-                ).grid(row=self.a, column=0, padx=0, pady=10)
+                ).grid(row=self.a, column=0, padx=0, pady=5)
                 self.delete_file_button = ctk.CTkButton(
                     self.appcatalogue_frame,
                     text="X",
@@ -244,7 +308,7 @@ class Setting(ctk.CTk):
                     fg_color="red",
                     hover_color="#980000",
                     command=lambda path=ligne:threading.Thread(target=self.delete_file_function(path)).start()
-                ).grid(row=self.a, column=1, padx=(10,0), pady=10)
+                ).grid(row=self.a, column=1, padx=(10,0), pady=5)
                 self.a+=1
     def allowd_frame_widget(self):
         self.allowd_frame.grid_rowconfigure(0, weight=1)
@@ -366,8 +430,8 @@ class Setting(ctk.CTk):
 
     def chose_file_image(self):
         self.chemin_fichier = filedialog.askopenfilename(
-            title="Sélectionner un fichier",
-            filetypes=[("Fichiers d'image", "*.png"), ("Fichiers d'image", "*.jpeg"), ("Fichiers d'image", "*.jpg"), ("Fichiers d'image", "*.webp"), ("Fichiers d'animation", "*.gif")]
+            title="Select a file",
+            filetypes=[("Image File", "*.png"), ("Image File", "*.jpeg"), ("Image File", "*.jpg"), ("Image File", "*.webp"), ("Animated File", "*.gif")]
         )
         with open(".AppData/Data.txt", 'w') as fichier:
             fichier.write(self.chemin_fichier)
