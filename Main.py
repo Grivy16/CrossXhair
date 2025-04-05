@@ -20,7 +20,7 @@ import win32api
 import requests
 import json
 import subprocess
-import Reload
+import shutil
 
 # Classe de données partagées
 class SharedData(QObject):
@@ -238,15 +238,15 @@ def Mise_a_jour():
     while not os.path.exists("Main_temp.exe") or os.path.getsize("Main_temp.exe") < 10000:
         time.sleep(0.1)
 
-    # Renommer le fichier téléchargé pour éviter le conflit
-    os.rename("Main_temp.exe", "CrossXhair.exe")
-
     with open(".AppData/Data.json", 'r', encoding="utf-8") as fichier:
         data = json.load(fichier)
     data["Info"]["Maj"] = LastGithubRelease()
     with open(".AppData/Data.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
-    Reload.Run()
+    subprocess.Popen(["Updater.exe"])
+    sys.exit()  # ferme le programme actuel pour permettre la MAJ
+
+
 
 if __name__ == "__main__":
     try :
@@ -256,7 +256,9 @@ if __name__ == "__main__":
         data = {
             "Info": {
                 "Crosshair": "Image/Basique.png",
-                "Maj": LastGithubRelease()
+                "Maj": LastGithubRelease(),
+                "On/Off" : "off",
+                "On/offStartup" : "off"
             },
             "File": {}
         }

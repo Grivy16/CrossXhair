@@ -102,8 +102,9 @@ class Setting(ctk.CTk):
     def Other_frame_widget(self):
         self.Start_label = ctk.CTkLabel(self.Other_frame, text="Start with windows", fg_color="transparent", font=("Calibri", 18, "bold"))
         self.Start_label.grid(row=0, column=0, pady=(10,5), padx=20)
-
-        self.Start_switch_var = ctk.StringVar(value="off")
+        with open(".AppData/Data.json", 'r', encoding="utf-8") as fichier:
+            self.data = json.load(fichier)
+        self.Start_switch_var = ctk.StringVar(value=self.data["Info"]["On/offStartup"])
         self.Start_switch = ctk.CTkSwitch(
             self.Other_frame,
             text="",
@@ -131,39 +132,48 @@ class Setting(ctk.CTk):
         self.RELOAD_btn.grid(row=3, column=0, pady=(5,10), padx=10, columnspan=2)
     def Start_switch_event(self):
         state = self.Start_switch_var.get()
+        self.data["Info"]["On/offStartup"] = self.Start_switch_var.get()
+        with open(".AppData/Data.json", "w", encoding="utf-8") as f:
+            json.dump(self.data, f, indent=4, ensure_ascii=False)
         if state =="off":
             self.remove_from_startup()
         elif state == "on" :
             self.add_to_startup()
 
+
     def add_to_startup(self):
         try:
-            link_path = os.path.join(os.getenv('appdata'), r'Microsoft\Windows\Start Menu\Programs\Startup\AutoRunScript.lnk')
+            startup_folder = os.path.join(os.getenv('appdata'), r'Microsoft\Windows\Start Menu\Programs\Startup')
+            link_path = os.path.join(startup_folder, 'CrossXhair.lnk')  # ✅ Bon nom
             link_target = sys.executable  # Programme en cours d'exécution
+            working_directory = os.path.dirname(os.path.abspath(sys.executable))  # ✅ Définit le bon dossier
 
-            # Création du raccourci
             with winshell.shortcut(link_path) as link:
                 link.path = link_target  # Chemin du programme
-            messagebox.showinfo("Information","✅ Shortcut added to windows startup.")
+                link.working_directory = working_directory  # ✅ Définit le dossier de travail
+
+            messagebox.showinfo("Information", "✅ Shortcut added to Windows startup.")
 
         except PermissionError:
-            messagebox.showerror("Error",f"🚫 Permission denied: Run the script as administrator. : {e}")
+            messagebox.showerror("Error", "🚫 Permission denied: Run the script as administrator.")
         except Exception as e:
-            messagebox.showerror("Error",f"🚫 Error adding shortcut to windows startup : {e}")
+            messagebox.showerror("Error", f"🚫 Error adding shortcut to Windows startup: {e}")
 
     def remove_from_startup(self):
         try:
-            # Chemin automatique du dossier de démarrage
-            link_path = os.path.join(os.getenv('appdata'), r'Microsoft\Windows\Start Menu\Programs\Startup\AutoRunScript.lnk')
+            startup_folder = os.path.join(os.getenv('appdata'), r'Microsoft\Windows\Start Menu\Programs\Startup')
+            link_path = os.path.join(startup_folder, 'CrossXhair.lnk')  # ✅ Bon nom
 
-            if os.path.exists(link_path):  # Vérifie si le raccourci existe
-                os.remove(link_path)  # Supprime le raccourci
-                messagebox.showinfo("Information","✅ Shortcut removed from windows startup")
+            if os.path.exists(link_path):
+                os.remove(link_path)
+                messagebox.showinfo("Information", "✅ Shortcut removed from Windows startup.")
             else:
-                messagebox.showerror("Error",f"🚫 The shortcut does not exist in the startup folder.")
+                messagebox.showerror("Error", "🚫 The shortcut does not exist in the startup folder.")
 
         except Exception as e:
-            messagebox.showerror("Error",f"🚫 Error deleting shortcut: {e}")
+            messagebox.showerror("Error", f"🚫 Error deleting shortcut: {e}")
+
+
     def addfilewisget(self):
         def addappinfile(path):
             with open(".AppData/Data.json", 'r', encoding="utf-8") as fichier:
@@ -318,7 +328,9 @@ class Setting(ctk.CTk):
         self.Onoff_label = ctk.CTkLabel(self.allowd_frame, text="enable / disable", fg_color="transparent", font=("Calibri", 18, "bold"))
         self.Onoff_label.grid(row=0, column=0, pady=10, padx=20, sticky="w")
 
-        self.crossair_switch_var = ctk.StringVar(value="off")
+        with open(".AppData/Data.json", 'r', encoding="utf-8") as fichier:
+            self.data = json.load(fichier)
+        self.crossair_switch_var = ctk.StringVar(value=self.data["Info"]["On/Off"])
         self.crossair_switch = ctk.CTkSwitch(
             self.allowd_frame,
             text="",
@@ -330,6 +342,9 @@ class Setting(ctk.CTk):
         )
         self.crossair_switch.grid(row=0, column=2, pady=10, padx=20, sticky="e")
     def crossair_switch_event(self):
+        self.data["Info"]["On/Off"] = self.crossair_switch_var.get()
+        with open(".AppData/Data.json", "w", encoding="utf-8") as f:
+            json.dump(self.data, f, indent=4, ensure_ascii=False)
         state = self.crossair_switch_var.get()
         self.shared_data.visibility_changed.emit(state)  # Émet le signal
 
